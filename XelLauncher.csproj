@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AssemblyName>XelLauncher</AssemblyName>
+		<RootNamespace>XelLauncher</RootNamespace>
+		<Version>1.3.5</Version>
+		<ApplicationIcon>icon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<WindowsSupportedOSPlatformVersion>5.1</WindowsSupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>5.1</TargetPlatformMinVersion>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<CustomResourceTypesSupport>true</CustomResourceTypesSupport>
+		<OptimizationPreference>Size</OptimizationPreference>
+	</PropertyGroup>
+
+<ItemGroup>
+	  <EmbeddedResource Include="Resources\Arknights_Toolbox.ico" />
+	  <EmbeddedResource Include="Resources\Arknights_Yituliu.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Resources\Arknights.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+  <Content Include="Resources\Arknights.jpg"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\BiliArknights.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\Endfield.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\BiliEndfield.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\GlobalEndfield.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\End.jpg"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\Popucom.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\BiliPopucom.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	  <Content Include="Resources\official.ico"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="load\**"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="VC-LTL" Version="5.3.1" />
+		<PackageReference Include="YY-Thunks" Version="1.1.9" />
+		<RdXmlFile Include="rd.xml" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net10.0-windows'">
+		<PackageReference Include="WinFormsComInterop" Version="0.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="H:\Vs Project\111\AntdUI\AntdUI.csproj" />
+		<PackageReference Include="AntdUI.EmojiFluentFlat" Version="*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+		<Compile Update="res_dark.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>res_dark.resx</DependentUpon>
+		</Compile>
+		<Compile Update="res_light.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>res_light.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="res_dark.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>res_dark.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="res_light.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>res_light.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,30 @@
+using System;
+using System.Collections.Generic;
+
+namespace XelLauncher.Models
+{
+    public class AppConfig
+    {
+        public List<GameEntry> Games { get; set; } = new List<GameEntry>();
+        public List<MaaEntry> MaaList { get; set; } = new List<MaaEntry>();
+
+        public Dictionary<string, string> Accounts { get; set; } = new Dictionary<string, string>();
+        public List<string> AccountOrder { get; set; } = new List<string>();
+
+        public string DefaultAccount { get; set; } = "";                    // 默认账号 ID（如 "A1"）
+        public HashSet<string> DisabledAccounts { get; set; } = new HashSet<string>(); // 禁用的账号 ID
+        public bool IsFirstRun { get; set; } = true;                        // 是否首次运行（用于控制首次点击官服时解锁 B 服按钮）
+        public string LastNotifiedVersion { get; set; } = "";               // 上次通知的版本号
+        public bool ShowTrayIcon { get; set; } = false;                     // 是否显示托盘图标
+        public bool MinimizeToTray { get; set; } = false;                   // 关闭主窗口时是否最小化到托盘
+        public bool AutoLaunchOfficial { get; set; } = false;               // 启动时自动打开官服
+        public bool AutoLaunchBilibili { get; set; } = false;               // 启动时自动打开B服
+        public string PrimaryColor { get; set; } = "#1677FF";               // 色板工具选择的主色
+        public string BackgroundColor { get; set; } = "#FFFFFF";              // 窗口背景色
+
+        // 旧字段保留，兼容已有 config.json
+        [Obsolete] public string RootPath { get; set; } = "";
+        [Obsolete] public string MAA_Official { get; set; } = "";
+        [Obsolete] public string MAA_Bilibili { get; set; } = "";
+    }
+}
