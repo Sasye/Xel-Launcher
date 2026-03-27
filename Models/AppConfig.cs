@@ -21,6 +21,7 @@ namespace XelLauncher.Models
         public bool AutoLaunchBilibili { get; set; } = false;               // 启动时自动打开B服
         public string PrimaryColor { get; set; } = "#1677FF";               // 色板工具选择的主色
         public string BackgroundColor { get; set; } = "#FFFFFF";              // 窗口背景色
+        public bool CloseAfterLaunch { get; set; } = false;               // 启动游戏后关闭软件
 
         // 旧字段保留，兼容已有 config.json
         [Obsolete] public string RootPath { get; set; } = "";
