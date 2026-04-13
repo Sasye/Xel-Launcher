@@ -24,11 +24,11 @@ Built on [AntdUI](https://github.com/AntdUI/AntdUI), supporting multi-server swi
 ├── Properties/              # Resources and publish configuration
 ├── Resources/               # Icons, images, and other static assets
 ├── load/                    # Payload archives for server switching
-│   ├── ArkBilibili.zip      # Arknights Bilibili server
-│   ├── ArkOfficial.zip      # Arknights official server
-│   ├── EndBilibili.zip      # Endfield Bilibili server
-│   ├── EndGlobal.zip        # Endfield global server
-│   └── EndOfficial.zip      # Endfield official server
+│   ├── ArkBilibili          # Arknights Bilibili server
+│   ├── ArkOfficial          # Arknights official server
+│   ├── EndBilibili          # Endfield Bilibili server
+│   ├── EndGlobal            # Endfield global server
+│   └── EndOfficial          # Endfield official server
 ├── Program.cs               # Entry point
 └── XelLauncher.csproj
 ```
