@@ -11,16 +11,14 @@ public class GameEntry
     /// <summary>Returns the localized display name based on current language.</summary>
     public string GetLocalizedName()
     {
-        // Only translate when English is active
-        if (!AntdUI.Localization.CurrentLanguage.StartsWith("en"))
-            return Name;
+        bool isEnglish = AntdUI.Localization.CurrentLanguage.StartsWith("en");
         return IconName switch
         {
-            "Arknights"      => "Arknights (Official)",
-            "BiliArknights"  => "Arknights (Bilibili)",
-            "Endfield"       => "Endfield (Official)",
-            "BiliEndfield"   => "Endfield (Bilibili)",
-            "GlobalEndfield" => "Endfield (Global)",
+            "Arknights"      => isEnglish ? "Arknights (Official)" : "明日方舟（官服）",
+            "BiliArknights"  => isEnglish ? "Arknights (Bilibili)" : "明日方舟（B服）",
+            "Endfield"       => isEnglish ? "Endfield (Official)"  : "明日方舟：终末地（官服）",
+            "BiliEndfield"   => isEnglish ? "Endfield (Bilibili)"  : "明日方舟：终末地（B服）",
+            "GlobalEndfield" => isEnglish ? "Endfield (Global)"    : "明日方舟：终末地（国际服）",
             _                => Name,
         };
     }
