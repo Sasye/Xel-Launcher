@@ -24,11 +24,11 @@
 ├── Properties/              # 资源与发布配置
 ├── Resources/               # 图标、图片等静态资源
 ├── load/                    # 切服用 payload 压缩包
-│   ├── ArkBilibili.zip      # 方舟 B 服
-│   ├── ArkOffiicial.zip     # 方舟官服
-│   ├── EndBilibili.zip      # 终末地 B 服
-│   ├── EndGlobal.zip        # 终末地国际服
-│   └── EndOfficial.zip      # 终末地官服
+│   ├── ArkBilibili          # 方舟 B 服差异文件
+│   ├── ArkOffiicial         # 方舟官服差异文件
+│   ├── EndBilibili          # 终末地 B 服差异文件
+│   ├── EndGlobal            # 终末地国际服差异文件
+│   └── EndOfficial          # 终末地官服差异文件
 ├── Program.cs               # 程序入口
 └── XelLauncher.csproj
 ```
