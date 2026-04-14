@@ -103,5 +103,45 @@ namespace XelLauncher.Helpers
                 return false;
             }
         }
+
+        /// <summary>
+        /// 流式下载文件到指定路径，通过 progress 回调汇报进度（0-100）和已下载/总大小字节数。
+        /// 抛出异常时由调用方处理。
+        /// </summary>
+        /// <param name="url">下载 URL</param>
+        /// <param name="destPath">目标文件完整路径</param>
+        /// <param name="progress">进度回调：(percent 0-100, downloadedBytes, totalBytes)</param>
+        /// <param name="ct">取消令牌</param>
+        public static async Task DownloadAsync(
+            string url,
+            string destPath,
+            Action<int, long, long> progress,
+            System.Threading.CancellationToken ct = default)
+        {
+            using var response = await _client.GetAsync(
+                url,
+                System.Net.Http.HttpCompletionOption.ResponseHeadersRead,
+                ct);
+            response.EnsureSuccessStatusCode();
+
+            var total = response.Content.Headers.ContentLength ?? -1L;
+            var dir = System.IO.Path.GetDirectoryName(destPath);
+            if (!string.IsNullOrEmpty(dir))
+                System.IO.Directory.CreateDirectory(dir);
+
+            using var src  = await response.Content.ReadAsStreamAsync(ct);
+            using var dest = System.IO.File.Create(destPath);
+
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int read;
+            while ((read = await src.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
+            {
+                await dest.WriteAsync(buffer, 0, read, ct);
+                downloaded += read;
+                int pct = total > 0 ? (int)(downloaded * 100 / total) : 0;
+                progress?.Invoke(pct, downloaded, total);
+            }
+        }
     }
 }
