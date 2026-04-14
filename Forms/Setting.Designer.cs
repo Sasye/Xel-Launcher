@@ -20,19 +20,12 @@ namespace XelLauncher
             panelLeft = new System.Windows.Forms.Panel();
             btnSoftware = new AntdUI.Button();
             btnLog = new AntdUI.Button();
-            btnMaa = new AntdUI.Button();
+            btnUpdate = new AntdUI.Button();
             dividerV = new AntdUI.Divider();
             panelRight = new System.Windows.Forms.Panel();
             panelLog = new System.Windows.Forms.Panel();
+            panelUpdate = new System.Windows.Forms.Panel();
             txtLog = new System.Windows.Forms.RichTextBox();
-            panelMaa = new System.Windows.Forms.Panel();
-            tableMaa = new System.Windows.Forms.TableLayoutPanel();
-            labelMaaOfficial = new AntdUI.Label();
-            labelMaaBilibili = new AntdUI.Label();
-            txtMaaOfficial = new AntdUI.Input();
-            txtMaaBilibili = new AntdUI.Input();
-            btnMaaOfficialBrowse = new AntdUI.Button();
-            btnMaaBilibiliBrowse = new AntdUI.Button();
             tableSoftware = new System.Windows.Forms.TableLayoutPanel();
             scrollSoftware = new System.Windows.Forms.Panel();
             label1 = new AntdUI.Label();
@@ -59,15 +52,14 @@ namespace XelLauncher
             panelRight.SuspendLayout();
             scrollSoftware.SuspendLayout();
             panelLog.SuspendLayout();
-            panelMaa.SuspendLayout();
-            tableMaa.SuspendLayout();
+            panelUpdate.SuspendLayout();
             tableSoftware.SuspendLayout();
             SuspendLayout();
             //
             // panelLeft
             //
             panelLeft.Controls.Add(btnLog);
-            panelLeft.Controls.Add(btnMaa);
+            panelLeft.Controls.Add(btnUpdate);
             panelLeft.Controls.Add(btnSoftware);
             panelLeft.Dock = System.Windows.Forms.DockStyle.Left;
             panelLeft.Width = 120;
@@ -91,6 +83,15 @@ namespace XelLauncher
             btnLog.Name = "btnLog";
             btnLog.Type = AntdUI.TTypeMini.Default;
             //
+            // btnUpdate
+            //
+            btnUpdate.Text = "软件更新";
+            btnUpdate.LocalizationText = "App.Setting.Update";
+            btnUpdate.Dock = System.Windows.Forms.DockStyle.Top;
+            btnUpdate.Height = 46;
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Type = AntdUI.TTypeMini.Default;
+            //
             // dividerV
             //
             dividerV.Dock = System.Windows.Forms.DockStyle.Left;
@@ -101,7 +102,7 @@ namespace XelLauncher
             // panelRight
             //
             panelRight.Controls.Add(panelLog);
-            panelRight.Controls.Add(panelMaa);
+            panelRight.Controls.Add(panelUpdate);
             panelRight.Controls.Add(scrollSoftware);
             panelRight.Dock = System.Windows.Forms.DockStyle.Fill;
             panelRight.Name = "panelRight";
@@ -120,69 +121,123 @@ namespace XelLauncher
             panelLog.Name = "panelLog";
             panelLog.Visible = false;
             //
-            // panelMaa
+            // panelUpdate
             //
-            panelMaa.Controls.Add(tableMaa);
-            panelMaa.Dock = System.Windows.Forms.DockStyle.Fill;
-            panelMaa.Name = "panelMaa";
-            panelMaa.Visible = false;
-            //
-            // tableMaa
-            //
-            tableMaa.ColumnCount = 3;
-            tableMaa.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 110F));
-            tableMaa.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableMaa.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
-            tableMaa.Controls.Add(labelMaaOfficial, 0, 0);
-            tableMaa.Controls.Add(txtMaaOfficial, 1, 0);
-            tableMaa.Controls.Add(btnMaaOfficialBrowse, 2, 0);
-            tableMaa.Controls.Add(labelMaaBilibili, 0, 1);
-            tableMaa.Controls.Add(txtMaaBilibili, 1, 1);
-            tableMaa.Controls.Add(btnMaaBilibiliBrowse, 2, 1);
-            tableMaa.Dock = System.Windows.Forms.DockStyle.Fill;
-            tableMaa.RowCount = 3;
-            tableMaa.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 54F));
-            tableMaa.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 54F));
-            tableMaa.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableMaa.Name = "tableMaa";
-            // txtMaaOfficial
-            //
-            txtMaaOfficial.Dock = System.Windows.Forms.DockStyle.Fill;
-            txtMaaOfficial.Name = "txtMaaOfficial";
-            txtMaaOfficial.PlaceholderText = "请选择 MAA 官服路径...";
-            txtMaaOfficial.TabIndex = 0;
-            txtMaaOfficial.Margin = new System.Windows.Forms.Padding(0, 10, 6, 10);
-            //
-            // btnMaaOfficialBrowse
-            //
-            btnMaaOfficialBrowse.Text = "浏览";
-            btnMaaOfficialBrowse.Dock = System.Windows.Forms.DockStyle.Fill;
-            btnMaaOfficialBrowse.Name = "btnMaaOfficialBrowse";
-            btnMaaOfficialBrowse.Type = AntdUI.TTypeMini.Default;
-            btnMaaOfficialBrowse.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
-            //
-            // labelMaaBilibili
-            //
-            labelMaaBilibili.Dock = System.Windows.Forms.DockStyle.Fill;
-            labelMaaBilibili.Name = "labelMaaBilibili";
-            labelMaaBilibili.Text = "MAA B服路径";
-            labelMaaBilibili.TabIndex = 0;
-            //
-            // txtMaaBilibili
-            //
-            txtMaaBilibili.Dock = System.Windows.Forms.DockStyle.Fill;
-            txtMaaBilibili.Name = "txtMaaBilibili";
-            txtMaaBilibili.PlaceholderText = "请选择 MAA B服路径...";
-            txtMaaBilibili.TabIndex = 0;
-            txtMaaBilibili.Margin = new System.Windows.Forms.Padding(0, 10, 6, 10);
-            //
-            // btnMaaBilibiliBrowse
-            //
-            btnMaaBilibiliBrowse.Text = "浏览";
-            btnMaaBilibiliBrowse.Dock = System.Windows.Forms.DockStyle.Fill;
-            btnMaaBilibiliBrowse.Name = "btnMaaBilibiliBrowse";
-            btnMaaBilibiliBrowse.Type = AntdUI.TTypeMini.Default;
-            btnMaaBilibiliBrowse.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
+            panelUpdate.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelUpdate.Name = "panelUpdate";
+            panelUpdate.Visible = false;
+            panelUpdate.Padding = new System.Windows.Forms.Padding(8);
+
+            // tableUpdate：版本信息 + 检查按钮
+            tableUpdate = new System.Windows.Forms.TableLayoutPanel();
+            tableUpdate.ColumnCount = 3;
+            tableUpdate.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableUpdate.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableUpdate.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 110F));
+            tableUpdate.RowCount = 2;
+            tableUpdate.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            tableUpdate.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
+            tableUpdate.Dock = System.Windows.Forms.DockStyle.Top;
+            tableUpdate.Height = 60;
+            tableUpdate.Name = "tableUpdate";
+
+            lblCurrentVersionTitle = new AntdUI.Label();
+            lblCurrentVersionTitle.Text = "当前版本";
+            lblCurrentVersionTitle.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblCurrentVersionTitle.Name = "lblCurrentVersionTitle";
+
+            lblLatestVersionTitle = new AntdUI.Label();
+            lblLatestVersionTitle.Text = "最新版本";
+            lblLatestVersionTitle.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblLatestVersionTitle.Name = "lblLatestVersionTitle";
+
+            lblCurrentVersion = new AntdUI.Label();
+            lblCurrentVersion.Text = "v" + System.Windows.Forms.Application.ProductVersion;
+            lblCurrentVersion.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblCurrentVersion.Name = "lblCurrentVersion";
+
+            lblLatestVersion = new AntdUI.Label();
+            lblLatestVersion.Text = "—";
+            lblLatestVersion.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblLatestVersion.Name = "lblLatestVersion";
+
+            btnCheckUpdate = new AntdUI.Button();
+            btnCheckUpdate.Text = "检查更新";
+            btnCheckUpdate.Name = "btnCheckUpdate";
+            btnCheckUpdate.Dock = System.Windows.Forms.DockStyle.Fill;
+            btnCheckUpdate.Margin = new System.Windows.Forms.Padding(4, 2, 0, 2);
+
+            tableUpdate.Controls.Add(lblCurrentVersionTitle, 0, 0);
+            tableUpdate.Controls.Add(lblLatestVersionTitle, 1, 0);
+            tableUpdate.Controls.Add(lblCurrentVersion, 0, 1);
+            tableUpdate.Controls.Add(lblLatestVersion, 1, 1);
+            tableUpdate.SetRowSpan(btnCheckUpdate, 2);
+            tableUpdate.Controls.Add(btnCheckUpdate, 2, 0);
+
+            // txtChangelog：更新日志
+            txtChangelog = new System.Windows.Forms.RichTextBox();
+            txtChangelog.Dock = System.Windows.Forms.DockStyle.Fill;
+            txtChangelog.Name = "txtChangelog";
+            txtChangelog.ReadOnly = true;
+            txtChangelog.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            txtChangelog.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            txtChangelog.Font = new System.Drawing.Font("Consolas", 9F);
+            txtChangelog.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            txtChangelog.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            txtChangelog.Text = "点击「检查更新」查看最新版本信息";
+
+            // panelUpdateButtons：下载按钮 + 进度
+            panelUpdateButtons = new System.Windows.Forms.Panel();
+            panelUpdateButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
+            panelUpdateButtons.Height = 80;
+            panelUpdateButtons.Name = "panelUpdateButtons";
+            panelUpdateButtons.Visible = false;
+
+            btnDownloadSetup = new AntdUI.Button();
+            btnDownloadSetup.Text = "⬇ 下载安装版";
+            btnDownloadSetup.Name = "btnDownloadSetup";
+            btnDownloadSetup.Width = 130;
+            btnDownloadSetup.Height = 34;
+            btnDownloadSetup.Location = new System.Drawing.Point(0, 4);
+
+            btnDownloadPortable = new AntdUI.Button();
+            btnDownloadPortable.Text = "⬇ 下载便携版";
+            btnDownloadPortable.Name = "btnDownloadPortable";
+            btnDownloadPortable.Width = 130;
+            btnDownloadPortable.Height = 34;
+            btnDownloadPortable.Location = new System.Drawing.Point(138, 4);
+
+            btnFallback = new AntdUI.Button();
+            btnFallback.Text = "打开网盘下载页";
+            btnFallback.Name = "btnFallback";
+            btnFallback.Width = 130;
+            btnFallback.Height = 34;
+            btnFallback.Location = new System.Drawing.Point(0, 4);
+            btnFallback.Visible = false;
+            btnFallback.Type = AntdUI.TTypeMini.Warn;
+
+            progressDownload = new AntdUI.Progress();
+            progressDownload.Name = "progressDownload";
+            progressDownload.Dock = System.Windows.Forms.DockStyle.Bottom;
+            progressDownload.Height = 8;
+            progressDownload.Value = 0F;
+            progressDownload.Visible = false;
+
+            lblDownloadStatus = new AntdUI.Label();
+            lblDownloadStatus.Name = "lblDownloadStatus";
+            lblDownloadStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
+            lblDownloadStatus.Height = 20;
+            lblDownloadStatus.Text = "";
+
+            panelUpdateButtons.Controls.Add(btnDownloadSetup);
+            panelUpdateButtons.Controls.Add(btnDownloadPortable);
+            panelUpdateButtons.Controls.Add(btnFallback);
+            panelUpdateButtons.Controls.Add(progressDownload);
+            panelUpdateButtons.Controls.Add(lblDownloadStatus);
+
+            panelUpdate.Controls.Add(txtChangelog);
+            panelUpdate.Controls.Add(tableUpdate);
+            panelUpdate.Controls.Add(panelUpdateButtons);
             //
             // txtLog
             //
@@ -394,8 +449,7 @@ namespace XelLauncher
             Name = "Setting";
             Size = new System.Drawing.Size(600, 400);
             tableSoftware.ResumeLayout(false);
-            tableMaa.ResumeLayout(false);
-            panelMaa.ResumeLayout(false);
+            panelUpdate.ResumeLayout(false);
             panelLog.ResumeLayout(false);
             scrollSoftware.ResumeLayout(false);
             panelRight.ResumeLayout(false);
@@ -431,17 +485,23 @@ namespace XelLauncher
         private AntdUI.Switch switch9;
         private AntdUI.Label label10;
         private AntdUI.Switch switch10;
-        private AntdUI.Button btnMaa;
         private AntdUI.Button btnLog;
+        private AntdUI.Button btnUpdate;
         private System.Windows.Forms.Panel panelLog;
         private System.Windows.Forms.RichTextBox txtLog;
-        private System.Windows.Forms.Panel panelMaa;
-        private System.Windows.Forms.TableLayoutPanel tableMaa;
-        private AntdUI.Label labelMaaOfficial;
-        private AntdUI.Label labelMaaBilibili;
-        private AntdUI.Input txtMaaOfficial;
-        private AntdUI.Input txtMaaBilibili;
-        private AntdUI.Button btnMaaOfficialBrowse;
-        private AntdUI.Button btnMaaBilibiliBrowse;
+        private System.Windows.Forms.Panel panelUpdate;
+        private AntdUI.Label lblCurrentVersion;
+        private AntdUI.Label lblLatestVersion;
+        private AntdUI.Label lblCurrentVersionTitle;
+        private AntdUI.Label lblLatestVersionTitle;
+        private AntdUI.Button btnCheckUpdate;
+        private System.Windows.Forms.RichTextBox txtChangelog;
+        private AntdUI.Button btnDownloadSetup;
+        private AntdUI.Button btnDownloadPortable;
+        private AntdUI.Button btnFallback;
+        private AntdUI.Progress progressDownload;
+        private AntdUI.Label lblDownloadStatus;
+        private System.Windows.Forms.TableLayoutPanel tableUpdate;
+        private System.Windows.Forms.Panel panelUpdateButtons;
     }
 }
