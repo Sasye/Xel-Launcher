@@ -130,6 +130,7 @@ namespace XelLauncher
 
             // tableUpdate：版本信息 + 检查按钮
             tableUpdate = new System.Windows.Forms.TableLayoutPanel();
+            tableUpdate.SuspendLayout();
             tableUpdate.ColumnCount = 3;
             tableUpdate.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             tableUpdate.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -188,6 +189,7 @@ namespace XelLauncher
 
             // panelUpdateButtons：下载按钮 + 进度
             panelUpdateButtons = new System.Windows.Forms.Panel();
+            panelUpdateButtons.SuspendLayout();
             panelUpdateButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
             panelUpdateButtons.Height = 80;
             panelUpdateButtons.Name = "panelUpdateButtons";
@@ -449,6 +451,8 @@ namespace XelLauncher
             Name = "Setting";
             Size = new System.Drawing.Size(600, 400);
             tableSoftware.ResumeLayout(false);
+            panelUpdateButtons.ResumeLayout(false);
+            tableUpdate.ResumeLayout(false);
             panelUpdate.ResumeLayout(false);
             panelLog.ResumeLayout(false);
             scrollSoftware.ResumeLayout(false);
