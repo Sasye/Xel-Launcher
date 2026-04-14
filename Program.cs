@@ -1,9 +1,10 @@
+using Microsoft.Win32;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using XelLauncher.Helpers;
 using XelLauncher.Forms;
+using XelLauncher.Helpers;
 
 namespace XelLauncher
 {
@@ -15,7 +16,30 @@ namespace XelLauncher
         [STAThread]
         static void Main(string[] arge)
         {
-            Microsoft.Web.WebView2.Core.CoreWebView2Environment.SetLoaderDllFolderPath("");
+            Application.ThreadException += (s, e) =>
+            LogHelper.LogError(e.Exception, "UI ThreadException");
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                if (e.ExceptionObject is Exception ex)
+                    LogHelper.LogError(ex, "UnhandledException");
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, ex) =>
+            {
+                LogHelper.LogError(ex.Exception, "UnobservedTaskException");
+                ex.SetObserved();
+            };
+            try
+            {
+                var version = Microsoft.Web.WebView2.Core.CoreWebView2Environment
+                    .GetAvailableBrowserVersionString();
+            }
+            catch
+            {
+                MessageBox.Show("检测到系统未安装 WebView2 Runtime，请安装后再运行！");
+                return;
+            }
             // 捕获 UI 线程未处理异常
             Application.ThreadException += (s, e) =>
                 Helpers.LogHelper.LogError(e.Exception, "UI ThreadException");
@@ -57,7 +81,16 @@ namespace XelLauncher
                 AntdUI.Style.SetPrimary(System.Drawing.ColorTranslator.FromHtml(cfg.PrimaryColor));
             if (command == "m") Application.Run(new Main());
             else if (command == "tab") Application.Run(new TabHeaderForm());
-            else Application.Run(new Overview(command == "t"));
+            else
+            {
+                var overview = new Overview(command == "t");
+                overview.Load += async (s, e) =>
+                {
+                    await Task.Delay(3000); // 等待主界面完全渲染
+                    await CheckUpdateSilentAsync(overview);
+                };
+                Application.Run(overview);
+            }
         }
 
         /// <summary>
@@ -73,6 +106,43 @@ namespace XelLauncher
                 return val is int i && i == 0;
             }
             catch { return false; }
+        }
+
+        /// <summary>
+        /// 静默检查更新：有新版本且未通知过同一版本时弹出通知。
+        /// </summary>
+        static async Task CheckUpdateSilentAsync(AntdUI.Window owner)
+        {
+            try
+            {
+                var info = await Helpers.UpdateHelper.CheckAsync();
+                if (info == null) return;
+
+                var cfg = Helpers.ConfigHelper.Load();
+                var currentVer = System.Windows.Forms.Application.ProductVersion;
+                if (!Helpers.UpdateHelper.IsNewer(currentVer, info.LatestVersion)) return;
+                if (cfg.LastNotifiedVersion == info.LatestVersion) return;
+
+                // 更新已通知版本，避免重复弹出
+                cfg.LastNotifiedVersion = info.LatestVersion;
+                Helpers.ConfigHelper.Save(cfg);
+
+                owner.Invoke(() =>
+                {
+                    AntdUI.Notification.open(new AntdUI.Notification.Config(new AntdUI.Target(owner),
+                        "发现新版本",
+                        "v" + info.LatestVersion,
+                        AntdUI.TType.Info,
+                        AntdUI.TAlignFrom.TR)
+                    {
+                        AutoClose = 6
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                Helpers.LogHelper.LogError(ex, "CheckUpdateSilentAsync");
+            }
         }
     }
 }
