@@ -12,7 +12,7 @@
 ![Stars](https://img.shields.io/github/stars/lTinchl/XelLauncher)
 ![Downloads](https://img.shields.io/github/downloads/lTinchl/XelLauncher/total)
 
-基于 [AntdUI](https://github.com/AntdUI/AntdUI) 构建，支持明日方舟、终末地多服切换，提供账号管理、MAA 集成等功能。
+基于 [AntdUI](https://github.com/AntdUI/AntdUI) 构建，支持明日方舟、终末地多服切换，提供账号管理、MAA 集成等功能
 
 </div>
 
