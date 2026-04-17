@@ -64,7 +64,7 @@ namespace XelLauncher.Forms
             var lblVersion = new AntdUI.Label
             {
                 Text = isEndfield
-                    ? AntdUI.Localization.Get("App.GameSetting.VersionEndfield", "版本：v1.1.9")
+                    ? AntdUI.Localization.Get("App.GameSetting.VersionEndfield", "版本：v1.2.4")
                     : AntdUI.Localization.Get("App.GameSetting.VersionArknights", "版本：v72.0.0"),
                 Location = new Point(80, 48),
                 Size = new Size(260, 24),

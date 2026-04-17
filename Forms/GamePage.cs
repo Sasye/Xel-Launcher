@@ -17,7 +17,7 @@ namespace XelLauncher.Forms
 
         private AntdUI.Button btnArknightsWiki;
         private AntdUI.Button btnAccountManage;
-        private AntdUI.Select accountSelect;
+        //private AntdUI.Select accountSelect;
         private AntdUI.Button GameStart;
         private AntdUI.Dropdown floatMenu;
         private AntdUI.Panel panelLaunch;
@@ -37,7 +37,7 @@ namespace XelLauncher.Forms
             BuildLaunchPanel();
             BuildCoverImage();
 
-            LoadAccountSelect();
+            //LoadAccountSelect();
             UpdateAccountControlsVisibility();
         }
 
@@ -59,29 +59,29 @@ namespace XelLauncher.Forms
             tooltip.SetTip(btnArknightsWiki, AntdUI.Localization.Get("App.Game.Toolbox", "小工具"));
             btnArknightsWiki.Click += btnArknightsWiki_Click;
 
-            btnAccountManage = new AntdUI.Button
-            {
-                IconSvg = "UserOutlined",
-                Type = AntdUI.TTypeMini.Primary,
-                Size = new Size(52, 52),
-                Location = new Point(0, 0),
-                BorderWidth = 0,
-                Radius = 24,
-                WaveSize = 4,
-            };
-            btnAccountManage.Click += btnAccountManage_Click;
+            //btnAccountManage = new AntdUI.Button
+            //{
+            //    IconSvg = "UserOutlined",
+            //    Type = AntdUI.TTypeMini.Primary,
+            //    Size = new Size(52, 52),
+            //    Location = new Point(0, 0),
+            //    BorderWidth = 0,
+            //    Radius = 24,
+            //    WaveSize = 4,
+            //};
+            //btnAccountManage.Click += btnAccountManage_Click;
 
-            accountSelect = new AntdUI.Select
-            {
-                Location = new Point(56, 0),
-                Size = new Size(164, 52),
-                Radius = 24,
-                BorderWidth = 1F,
-                PlaceholderText = AntdUI.Localization.Get("App.Game.SelectAccount", "  选择账号"),
-                Font = new Font("Microsoft YaHei UI", 11F),
-                DropDownRadius = 8,
-                Placement = AntdUI.TAlignFrom.TL,
-            };
+            //accountSelect = new AntdUI.Select
+            //{
+            //    Location = new Point(56, 0),
+            //    Size = new Size(164, 52),
+            //    Radius = 24,
+            //    BorderWidth = 1F,
+            //    PlaceholderText = AntdUI.Localization.Get("App.Game.SelectAccount", "  选择账号"),
+            //    Font = new Font("Microsoft YaHei UI", 11F),
+            //    DropDownRadius = 8,
+            //    Placement = AntdUI.TAlignFrom.TL,
+            //};
 
             GameStart = new AntdUI.Button
             {
@@ -136,7 +136,7 @@ namespace XelLauncher.Forms
             };
 
             panelLaunch.Controls.Add(btnAccountManage);
-            panelLaunch.Controls.Add(accountSelect);
+            //panelLaunch.Controls.Add(accountSelect);
             panelLaunch.Controls.Add(GameStart);
             panelLaunch.Controls.Add(floatMenu);
 
@@ -218,55 +218,55 @@ namespace XelLauncher.Forms
 
         private void UpdateAccountControlsVisibility()
         {
-            bool hideAccounts = !IsAccountGame;
-            btnAccountManage.Visible = !hideAccounts;
-            accountSelect.Visible = !hideAccounts;
+            //bool hideAccounts = !IsAccountGame;
+            ////btnAccountManage.Visible = !hideAccounts;
+            //accountSelect.Visible = !hideAccounts;
 
-            int targetWidth = hideAccounts ? 224 : 448;
-            int targetGS = hideAccounts ? 0 : 224;
-            int targetFM = hideAccounts ? 168 : 392;
-            panelLaunch.Width = targetWidth;
-            GameStart.Location = new Point(targetGS, 0);
-            floatMenu.Location = new Point(targetFM, 0);
+            //int targetWidth = hideAccounts ? 224 : 448;
+            //int targetGS = hideAccounts ? 0 : 224;
+            //int targetFM = hideAccounts ? 168 : 392;
+            panelLaunch.Width = 224;
+            GameStart.Location = new Point(0, 0);
+            floatMenu.Location = new Point(168, 0);
         }
 
         public void LoadAccountSelect()
         {
-            var cfg = ConfigHelper.Load();
-            accountSelect.Items.Clear();
+            //var cfg = ConfigHelper.Load();
+            //accountSelect.Items.Clear();
 
-            Dictionary<string, string> accounts;
-            List<string> order;
-            string defaultId;
-            HashSet<string> disabled;
+            //Dictionary<string, string> accounts;
+            //List<string> order;
+            //string defaultId;
+            //HashSet<string> disabled;
 
-            if (_game?.IconName == "Endfield")
-            {
-                accounts = cfg.EndfieldAccounts;
-                order = cfg.EndfieldAccountOrder;
-                defaultId = cfg.EndfieldDefaultAccount;
-                disabled = cfg.EndfieldDisabledAccounts;
-            }
-            else
-            {
-                accounts = cfg.Accounts;
-                order = cfg.AccountOrder;
-                defaultId = cfg.DefaultAccount;
-                disabled = cfg.DisabledAccounts;
-            }
+            //if (_game?.IconName == "Endfield")
+            //{
+            //    accounts = cfg.EndfieldAccounts;
+            //    order = cfg.EndfieldAccountOrder;
+            //    defaultId = cfg.EndfieldDefaultAccount;
+            //    disabled = cfg.EndfieldDisabledAccounts;
+            //}
+            //else
+            //{
+            //    accounts = cfg.Accounts;
+            //    order = cfg.AccountOrder;
+            //    defaultId = cfg.DefaultAccount;
+            //    disabled = cfg.DisabledAccounts;
+            //}
 
-            var ordered = order.Where(id => accounts.ContainsKey(id)).ToList();
-            foreach (var id in accounts.Keys)
-                if (!ordered.Contains(id)) ordered.Add(id);
-            foreach (var id in ordered)
-                if (!disabled.Contains(id))
-                    accountSelect.Items.Add(new AntdUI.SelectItem("  " + accounts[id], id));
-            if (!string.IsNullOrEmpty(defaultId) && !disabled.Contains(defaultId))
-                accountSelect.SelectedValue = defaultId;
-            else if (accountSelect.Items.Count > 0)
-                accountSelect.SelectedValue = ((AntdUI.SelectItem)accountSelect.Items[0]).Tag;
-            else
-                accountSelect.SelectedValue = null;
+            //var ordered = order.Where(id => accounts.ContainsKey(id)).ToList();
+            //foreach (var id in accounts.Keys)
+            //    if (!ordered.Contains(id)) ordered.Add(id);
+            //foreach (var id in ordered)
+            //    if (!disabled.Contains(id))
+            //        accountSelect.Items.Add(new AntdUI.SelectItem("  " + accounts[id], id));
+            //if (!string.IsNullOrEmpty(defaultId) && !disabled.Contains(defaultId))
+            //    accountSelect.SelectedValue = defaultId;
+            //else if (accountSelect.Items.Count > 0)
+            //    accountSelect.SelectedValue = ((AntdUI.SelectItem)accountSelect.Items[0]).Tag;
+            //else
+            //    accountSelect.SelectedValue = null;
         }
 
         public void UpdateLaunchPanelColor()
@@ -293,17 +293,17 @@ namespace XelLauncher.Forms
             }
         }
         //账号管理按钮调用逻辑
-        private void btnAccountManage_Click(object sender, EventArgs e)
-        {
-            var form = new AccountManagerForm(_overview, this, _game.IconName);
-            AntdUI.Modal.open(new AntdUI.Modal.Config(_overview, AntdUI.Localization.Get("App.Game.AccountManage", "账号管理"), form)
-            {
-                OkText = null,
-                CancelText = null,
-                BtnHeight = 0,
-                MaskClosable = true,
-            });
-        }
+        //private void btnAccountManage_Click(object sender, EventArgs e)
+        //{
+        //    var form = new AccountManagerForm(_overview, this, _game.IconName);
+        //    AntdUI.Modal.open(new AntdUI.Modal.Config(_overview, AntdUI.Localization.Get("App.Game.AccountManage", "账号管理"), form)
+        //    {
+        //        OkText = null,
+        //        CancelText = null,
+        //        BtnHeight = 0,
+        //        MaskClosable = true,
+        //    });
+        //}
 
         private void btnArkntools_Click(object sender, EventArgs e)
         {
@@ -496,26 +496,26 @@ namespace XelLauncher.Forms
             {
                 try
                 {
-                    if (_game.IconName == "Arknights")
-                    {
-                        string selectedAccountId = accountSelect.SelectedValue as string;
-                        if (!string.IsNullOrEmpty(selectedAccountId))
-                        {
-                            config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
-                            config.Refresh();
-                            await Helpers.GameLauncher.RestoreAccount(selectedAccountId);
-                        }
-                    }
-                    else if (_game.IconName == "Endfield")
-                    {
-                        string selectedAccountId = accountSelect.SelectedValue as string;
-                        if (!string.IsNullOrEmpty(selectedAccountId))
-                        {
-                            config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
-                            config.Refresh();
-                            await Helpers.GameLauncher.RestoreEndfieldAccount(selectedAccountId);
-                        }
-                    }
+                    //if (_game.IconName == "Arknights")
+                    //{
+                    //    string selectedAccountId = accountSelect.SelectedValue as string;
+                    //    if (!string.IsNullOrEmpty(selectedAccountId))
+                    //    {
+                    //        config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
+                    //        config.Refresh();
+                    //        await Helpers.GameLauncher.RestoreAccount(selectedAccountId);
+                    //    }
+                    //}
+                    //else if (_game.IconName == "Endfield")
+                    //{
+                    //    string selectedAccountId = accountSelect.SelectedValue as string;
+                    //    if (!string.IsNullOrEmpty(selectedAccountId))
+                    //    {
+                    //        config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
+                    //        config.Refresh();
+                    //        await Helpers.GameLauncher.RestoreEndfieldAccount(selectedAccountId);
+                    //    }
+                    //}
                     if (needSwitch)
                     {
                         bool usedHardLink = false;
