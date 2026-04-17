@@ -979,15 +979,15 @@ namespace XelLauncher.Helpers
                 case "App.Switch.KillingProcess":
                     return "Stopping game process...";
                 case "App.Switch.Linking":
-                    return "Switching server (hard link)...";
+                    return "Switching server...";
                 case "App.Switch.Copying":
                     return "Copying files...";
                 case "App.Switch.Extracting":
                     return "Extracting files...";
                 case "App.Switch.DoneHardLink":
-                    return "Server switched (hard link)";
+                    return "Server switched";
                 case "App.Switch.DoneCopy":
-                    return "Server switched (file copy)";
+                    return "Server switched";
                 case "App.Switch.NoPayload":
                     return "Server resources not found (no folder or ZIP in load directory)";
 
@@ -1165,7 +1165,49 @@ namespace XelLauncher.Helpers
                 case "App.Sync.AddSuccess":
                     return "Added: {0}";
 
-                case "smileys emotion":
+                // Update panel
+                case "App.Update.CurrentVersion":
+                    return "Current Version";
+                case "App.Update.LatestVersion":
+                    return "Latest Version";
+                case "App.Update.CheckUpdate":
+                    return "Check for Updates";
+                case "App.Update.Checking":
+                    return "Checking...";
+                case "App.Update.CheckFailed":
+                    return "Check failed. Please check your network connection.";
+                case "App.Update.AlreadyLatest":
+                    return "You are on the latest version";
+                case "App.Update.ChangelogHint":
+                    return "Click \"Check for Updates\" to see the latest release notes";
+                case "App.Update.DownloadSetup":
+                    return "⬇ Download Installer";
+                case "App.Update.DownloadPortable":
+                    return "⬇ Download Portable";
+                case "App.Update.Fallback":
+                    return "Open Download Page";
+                case "App.Update.SavePortableTitle":
+                    return "Save Portable Package";
+                case "App.Update.SavePortableFilter":
+                    return "ZIP Archive|*.zip";
+                case "App.Update.Preparing":
+                    return "Preparing download...";
+                case "App.Update.DownloadedMB":
+                    return "{0:F1} MB downloaded";
+                case "App.Update.DownloadDone":
+                    return "Download complete!";
+                case "App.Update.DownloadCanceled":
+                    return "Canceled";
+                case "App.Update.DownloadFailed":
+                    return "Download failed";
+                case "App.Update.ErrorPrefix":
+                    return "Unexpected error: ";
+                case "App.Update.DownloadErrorPrefix":
+                    return "Error: ";
+                case "App.Update.NewVersionTitle":
+                    return "New Version Available";
+
+
                     return "Smileys & Emotion";
                 case "people body":
                     return "People & Body";
