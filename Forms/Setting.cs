@@ -17,7 +17,7 @@ namespace XelLauncher
         const string RunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
         const string AppName = "Xel Launcher";
 
-        public bool Animation, ShadowEnabled, ShowInWindow, ScrollBarHide, TextRenderingHighQuality, MinimizeToTray, StartWithWindows, CloseAfterLaunch, HideToTrayOnLaunch, UseExternalBrowser;
+        public bool Animation, ShadowEnabled, ShowInWindow, ScrollBarHide, TextRenderingHighQuality, MinimizeToTray, StartWithWindows, CloseAfterLaunch, HideToTrayOnLaunch, UseExternalBrowser, UseHardLink;
 
         public Setting(AntdUI.BaseForm _form)
         {
@@ -38,6 +38,7 @@ namespace XelLauncher
             switch8.Checked = CloseAfterLaunch = ConfigHelper.Load().CloseAfterLaunch;
             switch9.Checked = HideToTrayOnLaunch = ConfigHelper.Load().HideToTrayOnLaunch;
             switch10.Checked = UseExternalBrowser = ConfigHelper.Load().UseExternalBrowser;
+            switch11.Checked = UseHardLink = ConfigHelper.Load().UseHardLink;
 
             switch1.CheckedChanged += (s, e) => { Animation = e.Value; };
             switch2.CheckedChanged += (s, e) => { ShadowEnabled = e.Value; };
@@ -49,6 +50,7 @@ namespace XelLauncher
             switch8.CheckedChanged += (s, e) => { CloseAfterLaunch = e.Value; };
             switch9.CheckedChanged += (s, e) => { HideToTrayOnLaunch = e.Value; };
             switch10.CheckedChanged += (s, e) => { UseExternalBrowser = e.Value; };
+            switch11.CheckedChanged += (s, e) => { UseHardLink = e.Value; };
 
             BindUpdatePanel();
             Load += async (s, e) =>
