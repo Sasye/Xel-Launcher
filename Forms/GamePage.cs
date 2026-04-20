@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Hi3Helper.Plugin.Core.Management;
 using XelLauncher.Helpers;
 using XelLauncher.Models;
 
@@ -17,16 +19,22 @@ namespace XelLauncher.Forms
 
         private AntdUI.Button btnArknightsWiki;
         private AntdUI.Button btnAccountManage;
-        //private AntdUI.Select accountSelect;
+        private AntdUI.Select accountSelect;
         private AntdUI.Button GameStart;
         private AntdUI.Dropdown floatMenu;
         private AntdUI.Panel panelLaunch;
 
         private AntdUI.FormFloatButton? _floatBtn;
         private bool _floatExpanded = false;
+        private System.Windows.Forms.Panel _bottomBar;
 
         private bool _accountExpanded = false;
         private readonly List<AntdUI.Button> _subBtns = new();
+
+        private EndfieldService _service;
+        private enum GameState { Unknown, NotInstalled, HasUpdate, Ready, Downloading, Paused }
+        private GameState _gameState = GameState.Unknown;
+        private CancellationTokenSource _downloadCts;
 
         public GamePage(GameEntry game, Overview overview)
         {
@@ -37,8 +45,9 @@ namespace XelLauncher.Forms
             BuildLaunchPanel();
             BuildCoverImage();
 
-            //LoadAccountSelect();
+            LoadAccountSelect();
             UpdateAccountControlsVisibility();
+            _ = CheckGameStatusAsync();
         }
 
         private void BuildLaunchPanel()
@@ -59,29 +68,29 @@ namespace XelLauncher.Forms
             tooltip.SetTip(btnArknightsWiki, AntdUI.Localization.Get("App.Game.Toolbox", "小工具"));
             btnArknightsWiki.Click += btnArknightsWiki_Click;
 
-            //btnAccountManage = new AntdUI.Button
-            //{
-            //    IconSvg = "UserOutlined",
-            //    Type = AntdUI.TTypeMini.Primary,
-            //    Size = new Size(52, 52),
-            //    Location = new Point(0, 0),
-            //    BorderWidth = 0,
-            //    Radius = 24,
-            //    WaveSize = 4,
-            //};
-            //btnAccountManage.Click += btnAccountManage_Click;
+            btnAccountManage = new AntdUI.Button
+            {
+                IconSvg = "UserOutlined",
+                Type = AntdUI.TTypeMini.Primary,
+                Size = new Size(52, 52),
+                Location = new Point(0, 0),
+                BorderWidth = 0,
+                Radius = 24,
+                WaveSize = 4,
+            };
+            btnAccountManage.Click += btnAccountManage_Click;
 
-            //accountSelect = new AntdUI.Select
-            //{
-            //    Location = new Point(56, 0),
-            //    Size = new Size(164, 52),
-            //    Radius = 24,
-            //    BorderWidth = 1F,
-            //    PlaceholderText = AntdUI.Localization.Get("App.Game.SelectAccount", "  选择账号"),
-            //    Font = new Font("Microsoft YaHei UI", 11F),
-            //    DropDownRadius = 8,
-            //    Placement = AntdUI.TAlignFrom.TL,
-            //};
+            accountSelect = new AntdUI.Select
+            {
+                Location = new Point(56, 0),
+                Size = new Size(164, 52),
+                Radius = 24,
+                BorderWidth = 1F,
+                PlaceholderText = AntdUI.Localization.Get("App.Game.SelectAccount", "  选择账号"),
+                Font = new Font("Microsoft YaHei UI", 11F),
+                DropDownRadius = 8,
+                Placement = AntdUI.TAlignFrom.TL,
+            };
 
             GameStart = new AntdUI.Button
             {
@@ -120,10 +129,11 @@ namespace XelLauncher.Forms
                     BeginInvoke(() =>
                     {
                         floatMenu.SelectedValue = null;
-                        AntdUI.Drawer.open(_overview, new GameSettingForm(_game, _overview), AntdUI.TAlignMini.Right);
+                        AntdUI.Drawer.open(_overview, new GameSettingForm(_game, _overview, UpdateAccountControlsVisibility, () => _ = CheckGameStatusAsync()), AntdUI.TAlignMini.Right);
                     });
                 }
             };
+            floatMenu.Items.Add(new AntdUI.SelectItem(AntdUI.Localization.Get("App.Game.Deledwonload", "清理下载缓存"), "Deledwonload").SetIcon("DeleteOutlined"));
 
             panelLaunch = new AntdUI.Panel
             {
@@ -136,7 +146,7 @@ namespace XelLauncher.Forms
             };
 
             panelLaunch.Controls.Add(btnAccountManage);
-            //panelLaunch.Controls.Add(accountSelect);
+            panelLaunch.Controls.Add(accountSelect);
             panelLaunch.Controls.Add(GameStart);
             panelLaunch.Controls.Add(floatMenu);
 
@@ -165,6 +175,7 @@ namespace XelLauncher.Forms
                 Dock = DockStyle.Bottom,
                 Height = 72,
             };
+            _bottomBar = bottomBar;
 
             // 将按钮控件从 panelLaunch 移到 bottomBar
             // 子按钮紧靠 btnArknightsWiki 右侧展开，放在 bottomBar 里
@@ -214,59 +225,70 @@ namespace XelLauncher.Forms
             panelLaunch.Location = new Point(bar.Width - panelLaunch.Width - 16, (bar.Height - panelLaunch.Height) / 2);
         }
 
-        private bool IsAccountGame => _game?.IconName == "Arknights" || _game?.IconName == "Endfield";
+        private bool IsAccountGame => _game?.IconName is "Arknights" or "Endfield" or "GlobalEndfield";
 
         private void UpdateAccountControlsVisibility()
         {
-            //bool hideAccounts = !IsAccountGame;
-            ////btnAccountManage.Visible = !hideAccounts;
-            //accountSelect.Visible = !hideAccounts;
+            var cfg = ConfigHelper.Load();
+            var entry = cfg.Games.Find(g => g.IconName == _game.IconName);
+            bool hideAccounts = !(entry?.AccountSwitchEnabled ?? false) || !IsAccountGame;
+            btnAccountManage.Visible = !hideAccounts;
+            accountSelect.Visible = !hideAccounts;
 
-            //int targetWidth = hideAccounts ? 224 : 448;
-            //int targetGS = hideAccounts ? 0 : 224;
-            //int targetFM = hideAccounts ? 168 : 392;
-            panelLaunch.Width = 224;
-            GameStart.Location = new Point(0, 0);
-            floatMenu.Location = new Point(168, 0);
+            int targetWidth = hideAccounts ? 224 : 448;
+            int targetGS = hideAccounts ? 0 : 224;
+            int targetFM = hideAccounts ? 168 : 392;
+            panelLaunch.Width = targetWidth;
+            GameStart.Location = new Point(targetGS, 0);
+            floatMenu.Location = new Point(targetFM, 0);
+            if (_bottomBar != null)
+                PositionLaunchInBar(_bottomBar);
         }
 
         public void LoadAccountSelect()
         {
-            //var cfg = ConfigHelper.Load();
-            //accountSelect.Items.Clear();
+            var cfg = ConfigHelper.Load();
+            accountSelect.Items.Clear();
 
-            //Dictionary<string, string> accounts;
-            //List<string> order;
-            //string defaultId;
-            //HashSet<string> disabled;
+            Dictionary<string, string> accounts;
+            List<string> order;
+            string defaultId;
+            HashSet<string> disabled;
 
-            //if (_game?.IconName == "Endfield")
-            //{
-            //    accounts = cfg.EndfieldAccounts;
-            //    order = cfg.EndfieldAccountOrder;
-            //    defaultId = cfg.EndfieldDefaultAccount;
-            //    disabled = cfg.EndfieldDisabledAccounts;
-            //}
-            //else
-            //{
-            //    accounts = cfg.Accounts;
-            //    order = cfg.AccountOrder;
-            //    defaultId = cfg.DefaultAccount;
-            //    disabled = cfg.DisabledAccounts;
-            //}
+            if (_game?.IconName == "Endfield")
+            {
+                accounts = cfg.EndfieldAccounts;
+                order = cfg.EndfieldAccountOrder;
+                defaultId = cfg.EndfieldDefaultAccount;
+                disabled = cfg.EndfieldDisabledAccounts;
+            }
+            else if (_game?.IconName == "GlobalEndfield")
+            {
+                accounts = cfg.GlobalEndfieldAccounts;
+                order = cfg.GlobalEndfieldAccountOrder;
+                defaultId = cfg.GlobalEndfieldDefaultAccount;
+                disabled = cfg.GlobalEndfieldDisabledAccounts;
+            }
+            else
+            {
+                accounts = cfg.Accounts;
+                order = cfg.AccountOrder;
+                defaultId = cfg.DefaultAccount;
+                disabled = cfg.DisabledAccounts;
+            }
 
-            //var ordered = order.Where(id => accounts.ContainsKey(id)).ToList();
-            //foreach (var id in accounts.Keys)
-            //    if (!ordered.Contains(id)) ordered.Add(id);
-            //foreach (var id in ordered)
-            //    if (!disabled.Contains(id))
-            //        accountSelect.Items.Add(new AntdUI.SelectItem("  " + accounts[id], id));
-            //if (!string.IsNullOrEmpty(defaultId) && !disabled.Contains(defaultId))
-            //    accountSelect.SelectedValue = defaultId;
-            //else if (accountSelect.Items.Count > 0)
-            //    accountSelect.SelectedValue = ((AntdUI.SelectItem)accountSelect.Items[0]).Tag;
-            //else
-            //    accountSelect.SelectedValue = null;
+            var ordered = order.Where(id => accounts.ContainsKey(id)).ToList();
+            foreach (var id in accounts.Keys)
+                if (!ordered.Contains(id)) ordered.Add(id);
+            foreach (var id in ordered)
+                if (!disabled.Contains(id))
+                    accountSelect.Items.Add(new AntdUI.SelectItem("  " + accounts[id], id));
+            if (!string.IsNullOrEmpty(defaultId) && !disabled.Contains(defaultId))
+                accountSelect.SelectedValue = defaultId;
+            else if (accountSelect.Items.Count > 0)
+                accountSelect.SelectedValue = ((AntdUI.SelectItem)accountSelect.Items[0]).Tag;
+            else
+                accountSelect.SelectedValue = null;
         }
 
         public void UpdateLaunchPanelColor()
@@ -293,46 +315,46 @@ namespace XelLauncher.Forms
             }
         }
         //账号管理按钮调用逻辑
-        //private void btnAccountManage_Click(object sender, EventArgs e)
-        //{
-        //    var form = new AccountManagerForm(_overview, this, _game.IconName);
-        //    AntdUI.Modal.open(new AntdUI.Modal.Config(_overview, AntdUI.Localization.Get("App.Game.AccountManage", "账号管理"), form)
-        //    {
-        //        OkText = null,
-        //        CancelText = null,
-        //        BtnHeight = 0,
-        //        MaskClosable = true,
-        //    });
-        //}
+        private void btnAccountManage_Click(object sender, EventArgs e)
+        {
+            var form = new AccountManagerForm(_overview, this, _game.IconName);
+            AntdUI.Modal.open(new AntdUI.Modal.Config(_overview, AntdUI.Localization.Get("App.Game.AccountManage", "账号管理"), form)
+            {
+                OkText = null,
+                CancelText = null,
+                BtnHeight = 0,
+                MaskClosable = true,
+            });
+        }
 
         private void btnArkntools_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://arkntools.app").Show();
+            TabHeaderForm.Open("https://arkntools.app");
         }
 
         private void btnPrtsWiki_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://prts.wiki").Show();
+            TabHeaderForm.Open("https://prts.wiki");
         }
 
         private void btnYituliu_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://ark.yituliu.cn").Show();
+            TabHeaderForm.Open("https://ark.yituliu.cn");
         }
 
         private void btnEndYituliu_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://ef.yituliu.cn/").Show();
+            TabHeaderForm.Open("https://ef.yituliu.cn/");
         }
 
         private void btnWarfarin_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://warfarin.wiki").Show();
+            TabHeaderForm.Open("https://warfarin.wiki");
         }
 
         private void btnEndfieldtools_Click(object sender, EventArgs e)
         {
-            new TabHeaderForm("https://endfieldtools.dev/").Show();
+            TabHeaderForm.Open("https://endfieldtools.dev/");
         }
 
         private AntdUI.Button CreateSubButton(System.Drawing.Icon icon, EventHandler clickHandler)
@@ -400,13 +422,178 @@ namespace XelLauncher.Forms
             {
                 _floatBtn?.Close();
                 _floatBtn = null;
+                _downloadCts?.Dispose();
+                _downloadCts = null;
+                _service?.Dispose();
+                _service = null;
             }
             base.Dispose(disposing);
+        }
+
+        private async Task CheckGameStatusAsync()
+        {
+            try { _service = new EndfieldService(_game.IconName); }
+            catch { return; }
+
+            try
+            {
+                var cfg = ConfigHelper.Load();
+                var entry = cfg.Games.Find(g => g.IconName == _game.IconName);
+                string path = entry?.RootPath ?? _game.RootPath;
+                if (string.IsNullOrEmpty(path)) return;
+
+                var status = await _service.CheckStatusAsync(path);
+                if (status == null) return;
+
+                _gameState = !status.IsInstalled ? GameState.NotInstalled
+                           : status.HasUpdate    ? GameState.HasUpdate
+                                                 : GameState.Ready;
+
+                if (IsHandleCreated)
+                    BeginInvoke(() => RefreshGameStartButton());
+            }
+            catch { }
+        }
+
+        private void RefreshGameStartButton()
+        {
+            switch (_gameState)
+            {
+                case GameState.NotInstalled:
+                    GameStart.Text = AntdUI.Localization.Get("App.Game.Install", "安装游戏");
+                    GameStart.IconSvg = "DownloadOutlined";
+                    break;
+                case GameState.HasUpdate:
+                    GameStart.Text = AntdUI.Localization.Get("App.Game.Update", "更新游戏");
+                    GameStart.IconSvg = "SyncOutlined";
+                    break;
+                case GameState.Downloading:
+                    GameStart.Text = AntdUI.Localization.Get("App.Game.Pause", "暂停");
+                    GameStart.IconSvg = "PauseOutlined";
+                    break;
+                case GameState.Paused:
+                    GameStart.Text = AntdUI.Localization.Get("App.Game.Resume", "继续");
+                    GameStart.IconSvg = "DownloadOutlined";
+                    break;
+                default:
+                    GameStart.Text = AntdUI.Localization.Get("App.Game.Start", "开始游戏");
+                    GameStart.IconSvg = "PoweroffOutlined";
+                    break;
+            }
+        }
+
+        private void InstallOrUpdateGame()
+        {
+            var cfg = ConfigHelper.Load();
+            var entry = cfg.Games.Find(g => g.IconName == _game.IconName);
+            string path = entry?.RootPath ?? _game.RootPath;
+
+            if (string.IsNullOrEmpty(path))
+            {
+                Helpers.DialogHelper.InjectIcon(Properties.Resources.icon);
+                using var dlg = new FolderBrowserDialog
+                {
+                    Description = AntdUI.Localization.Get("App.Game.SelectInstallDir", "选择游戏安装目录"),
+                    UseDescriptionForTitle = true,
+                };
+                if (dlg.ShowDialog(_overview) != DialogResult.OK) return;
+                path = dlg.SelectedPath;
+                var cfg2 = ConfigHelper.Load();
+                var e2 = cfg2.Games.Find(g => g.IconName == _game.IconName);
+                if (e2 != null) { e2.RootPath = path; ConfigHelper.Save(cfg2); }
+            }
+
+            _downloadCts?.Dispose();
+            _downloadCts = new CancellationTokenSource();
+            _gameState = GameState.Downloading;
+            RefreshGameStartButton();
+
+            var capturedPath = path;
+            AntdUI.Message.loading(_overview, AntdUI.Localization.Get("App.Game.Install.Init", "初始化..."), async config =>
+            {
+                long lastTick = 0;
+                try
+                {
+                    await _service.InstallOrUpdateAsync(capturedPath, (state, downloaded, total) =>
+                    {
+                        string label;
+                        if (state.HasFlag(InstallProgressState.Completed))
+                            label = AntdUI.Localization.Get("App.Game.Install.Completed", "完成");
+                        else if (state.HasFlag(InstallProgressState.Download))
+                            label = FormatDownloadProgress(downloaded, total);
+                        else if (state.HasFlag(InstallProgressState.Install))
+                            label = AntdUI.Localization.Get("App.Game.Install.Installing", "安装中...");
+                        else if (state.HasFlag(InstallProgressState.Updating))
+                            label = AntdUI.Localization.Get("App.Game.Install.Updating", "更新中...");
+                        else if (state.HasFlag(InstallProgressState.Verify))
+                            label = AntdUI.Localization.Get("App.Game.Install.Verifying", "校验中...");
+                        else if (state.HasFlag(InstallProgressState.Removing))
+                            label = AntdUI.Localization.Get("App.Game.Install.Removing", "清理中...");
+                        else
+                            return;
+
+                        long now = Environment.TickCount64;
+                        if (now - lastTick < 800) return;
+                        lastTick = now;
+                        config.Text = label;
+                        config.Refresh();
+                    }, _downloadCts.Token);
+
+                    _gameState = GameState.Unknown;
+                    _ = CheckGameStatusAsync();
+                    config.OK(AntdUI.Localization.Get("App.Game.Install.Success", "安装/更新完成"));
+                }
+                catch (Exception ex) when (IsCancellation(ex))
+                {
+                    _gameState = GameState.Paused;
+                    config.OK(AntdUI.Localization.Get("App.Game.Install.Paused", "已暂停"));
+                }
+                catch (Exception ex)
+                {
+                    _gameState = GameState.Unknown;
+                    _ = CheckGameStatusAsync();
+                    config.Error(ex.Message);
+                }
+                finally
+                {
+                    BeginInvoke(() =>
+                    {
+                        if (!GameStart.IsDisposed) RefreshGameStartButton();
+                    });
+                }
+            });
+        }
+
+        private static bool IsCancellation(Exception ex) =>
+            ex is OperationCanceledException ||
+            (ex is AggregateException aex && aex.InnerExceptions.Count > 0 &&
+             aex.InnerExceptions[0] is OperationCanceledException);
+
+        private static string FormatDownloadProgress(long downloaded, long total)
+        {
+            if (total <= 0) return null;
+            double pct   = (double)downloaded / total * 100;
+            double dlMB  = downloaded / 1048576.0;
+            double totMB = total / 1048576.0;
+            return $"{dlMB:F1} / {totMB:F1} MB  ({pct:F0}%)";
         }
 
         private async void GameStart_Click(object sender, EventArgs e)
         {
             if (GameStart.Loading) return;
+
+            if (_gameState == GameState.NotInstalled || _gameState == GameState.HasUpdate || _gameState == GameState.Paused)
+            {
+                InstallOrUpdateGame();
+                return;
+            }
+
+            if (_gameState == GameState.Downloading)
+            {
+                _downloadCts?.Cancel();
+                return;
+            }
+
             var cfg = ConfigHelper.Load();
             var entry = cfg.Games.Find(g => g.IconName == _game.IconName);
             string path = entry?.RootPath ?? _game.RootPath;
@@ -496,26 +683,36 @@ namespace XelLauncher.Forms
             {
                 try
                 {
-                    //if (_game.IconName == "Arknights")
-                    //{
-                    //    string selectedAccountId = accountSelect.SelectedValue as string;
-                    //    if (!string.IsNullOrEmpty(selectedAccountId))
-                    //    {
-                    //        config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
-                    //        config.Refresh();
-                    //        await Helpers.GameLauncher.RestoreAccount(selectedAccountId);
-                    //    }
-                    //}
-                    //else if (_game.IconName == "Endfield")
-                    //{
-                    //    string selectedAccountId = accountSelect.SelectedValue as string;
-                    //    if (!string.IsNullOrEmpty(selectedAccountId))
-                    //    {
-                    //        config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
-                    //        config.Refresh();
-                    //        await Helpers.GameLauncher.RestoreEndfieldAccount(selectedAccountId);
-                    //    }
-                    //}
+                    if (_game.IconName == "Arknights")
+                    {
+                        string selectedAccountId = accountSelect.SelectedValue as string;
+                        if (!string.IsNullOrEmpty(selectedAccountId))
+                        {
+                            config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
+                            config.Refresh();
+                            await Helpers.GameLauncher.RestoreAccount(selectedAccountId);
+                        }
+                    }
+                    else if (_game.IconName == "Endfield")
+                    {
+                        string selectedAccountId = accountSelect.SelectedValue as string;
+                        if (!string.IsNullOrEmpty(selectedAccountId))
+                        {
+                            config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
+                            config.Refresh();
+                            await Helpers.GameLauncher.RestoreEndfieldAccount(selectedAccountId);
+                        }
+                    }
+                    else if (_game.IconName == "GlobalEndfield")
+                    {
+                        string selectedAccountId = accountSelect.SelectedValue as string;
+                        if (!string.IsNullOrEmpty(selectedAccountId))
+                        {
+                            config.Text = AntdUI.Localization.Get("App.Game.SwitchingAccount", "切换账号中...");
+                            config.Refresh();
+                            await Helpers.GameLauncher.RestoreGlobalEndfieldAccount(selectedAccountId);
+                        }
+                    }
                     if (needSwitch)
                     {
                         bool usedHardLink = false;
