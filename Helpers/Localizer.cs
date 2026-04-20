@@ -1068,6 +1068,12 @@ namespace XelLauncher.Helpers
                     return "Custom Launch Sync";
                 case "App.GameSetting.ManageSync":
                     return "Manage Sync Apps";
+                case "App.GameSetting.AccountSwitch":
+                    return "Account switching function";
+                case "App.GameSetting.CustomLaunchArgs":
+                    return "Customize startup parameters";
+                case "App.GameSetting.CustomLaunchArgsPlaceholder":
+                    return "Enter startup parameters";
 
                 // Setting panel
                 case "App.Setting.Software":
@@ -1086,6 +1092,8 @@ namespace XelLauncher.Helpers
                     return "Hide to tray after launching game";
                 case "App.Setting.UseExternalBrowser":
                     return "Use external browser for links";
+                case "App.Setting.UseHardLink":
+                    return "Use hard links for server switching";
 
                 // BrowserForm
                 case "App.Browser.Title":
