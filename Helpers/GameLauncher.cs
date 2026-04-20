@@ -94,8 +94,10 @@ namespace XelLauncher.Helpers
             if (payloadDir == null || !Directory.Exists(payloadDir))
                 throw new FileNotFoundException(AntdUI.Localization.Get("App.Switch.NoPayload", "未找到切服资源（文件夹或 ZIP 均不存在）"));
 
-            onProgress(AntdUI.Localization.Get("App.Switch.Linking", "切服中（硬链接）..."));
             bool useHardLink = ConfigHelper.Load().UseHardLink;
+            onProgress(useHardLink
+                ? AntdUI.Localization.Get("App.Switch.Linking", "切服中（硬链接）...")
+                : AntdUI.Localization.Get("App.Switch.Copying", "切服中（文件复制）..."));
             bool usedHardLink = await HardLinkOrCopyDirectory(payloadDir, rootPath, tryHardLink: useHardLink);
             onResult(usedHardLink);
 
