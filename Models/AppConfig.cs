@@ -25,6 +25,12 @@ namespace XelLauncher.Models
         public List<string> EndfieldAccountOrder { get; set; } = new List<string>();
         public string EndfieldDefaultAccount { get; set; } = "";
         public HashSet<string> EndfieldDisabledAccounts { get; set; } = new HashSet<string>();
+
+        // 终末地国际服账号管理
+        public Dictionary<string, string> GlobalEndfieldAccounts { get; set; } = new Dictionary<string, string>();
+        public List<string> GlobalEndfieldAccountOrder { get; set; } = new List<string>();
+        public string GlobalEndfieldDefaultAccount { get; set; } = "";
+        public HashSet<string> GlobalEndfieldDisabledAccounts { get; set; } = new HashSet<string>();
         public string LastNotifiedVersion { get; set; } = "";               // 上次通知的版本号
         public bool ShowTrayIcon { get; set; } = false;                     // 是否显示托盘图标
         public bool MinimizeToTray { get; set; } = false;                   // 关闭主窗口时是否最小化到托盘
@@ -40,6 +46,7 @@ namespace XelLauncher.Models
         /// 主题模式："system"（跟随系统）、"light"（强制浅色）、"dark"（强制深色）
         /// </summary>
         public string ThemeMode { get; set; } = "system";
+        public bool UseHardLink { get; set; } = true;               // 切服时使用硬链接（false=强制文件复制）
 
     }
 }
