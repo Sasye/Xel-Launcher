@@ -25,6 +25,7 @@ namespace XelLauncher.Helpers
                 "Endfield"       => new EndfieldCnPresetConfig(),
                 "BiliEndfield"   => new EndfieldBiliPresetConfig(),
                 "GlobalEndfield" => new EndfieldGlobalPresetConfig(),
+                "PlayEndfield"   => new EndfieldGlobalPresetConfig(), // GooglePlay 与国际服共用同一游戏文件
                 _ => throw new ArgumentException($"未知游戏类型：{iconName}", nameof(iconName))
             };
         }

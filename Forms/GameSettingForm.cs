@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using XelLauncher.Helpers;
 using XelLauncher.Models;
@@ -62,15 +63,43 @@ namespace XelLauncher.Forms
             };
 
             // ── 游戏版本 ──
-            bool isEndfield = game.IconName == "Endfield" || game.IconName == "BiliEndfield" || game.IconName == "GlobalEndfield";
+            string cachedVersion = latest?.LocalVersion ?? "";
             var lblVersion = new AntdUI.Label
             {
-                Text = isEndfield
-                    ? AntdUI.Localization.Get("App.GameSetting.VersionEndfield", "版本：v1.2.4")
-                    : AntdUI.Localization.Get("App.GameSetting.VersionArknights", "版本：v72.0.0"),
+                Text = string.IsNullOrEmpty(cachedVersion)
+                    ? AntdUI.Localization.Get("App.GameSetting.VersionChecking", "版本：N/A")
+                    : AntdUI.Localization.Get("App.GameSetting.Version", "版本：") + cachedVersion,
                 Location = new Point(80, 48),
                 Size = new Size(260, 24),
                 Font = new Font("Microsoft YaHei UI", 9F),
+            };
+            HandleCreated += async (s, e) =>
+            {
+                try
+                {
+                    // Bili/Global/Play 服与官服共用游戏文件，用官服 Preset 读取本地版本
+                    string svcIconName = game.IconName switch
+                    {
+                        "BiliEndfield" or "GlobalEndfield" or "PlayEndfield" => "Endfield",
+                        "BiliArknights" => "Arknights",
+                        _ => game.IconName
+                    };
+                    using var svc = new EndfieldService(svcIconName);
+                    var status = await svc.CheckStatusAsync(currentPath).ConfigureAwait(false);
+                    if (status == null || string.IsNullOrEmpty(status.LocalVersion)) return;
+                    if (!lblVersion.IsDisposed)
+                        BeginInvoke((System.Windows.Forms.MethodInvoker)(() =>
+                            lblVersion.Text = AntdUI.Localization.Get("App.GameSetting.Version", "版本：") + status.LocalVersion));
+                    // 回写缓存
+                    var cfgSave = ConfigHelper.Load();
+                    var entry = cfgSave.Games.Find(g => g.IconName == game.IconName);
+                    if (entry != null && entry.LocalVersion != status.LocalVersion)
+                    {
+                        entry.LocalVersion = status.LocalVersion;
+                        ConfigHelper.Save(cfgSave);
+                    }
+                }
+                catch { }
             };
 
             // ── 分割线 ──
@@ -210,7 +239,7 @@ namespace XelLauncher.Forms
 
                 var btnSync = new AntdUI.Button
                 {
-                    Text = AntdUI.Localization.Get("App.GameSetting.SyncToAll", "同步路径到 BillBili服 / 国际服"),
+                    Text = AntdUI.Localization.Get("App.GameSetting.SyncToAll", "同步路径到 BillBili服 / 国际服 / GooglePlay服"),
                     Location = new Point(20, 316),
                     Size = new Size(320, 36),
                     Ghost = true,
@@ -224,13 +253,13 @@ namespace XelLauncher.Forms
                         return;
                     }
                     var cfg = ConfigHelper.Load();
-                    foreach (var icon in new[] { "BiliEndfield", "GlobalEndfield" })
+                    foreach (var icon in new[] { "BiliEndfield", "GlobalEndfield", "PlayEndfield" })
                     {
                         var other = cfg.Games.Find(g => g.IconName == icon);
                         if (other != null) other.RootPath = currentPath;
                     }
                     ConfigHelper.Save(cfg);
-                    AntdUI.Message.success(_overview, AntdUI.Localization.Get("App.GameSetting.SyncSuccessAll", "路径已同步到 BillBili服 和 国际服"));
+                    AntdUI.Message.success(_overview, AntdUI.Localization.Get("App.GameSetting.SyncSuccessAll", "路径已同步到 BillBili服 / 国际服 / GooglePlay服"));
                 };
                 Controls.Add(btnSync);
                 Size = new Size(360, 386);
@@ -366,6 +395,190 @@ namespace XelLauncher.Forms
                     TabHeaderForm.Open("https://endfield.hypergryph.com/en-US/");
                 Controls.Add(btn);
                 Size = new Size(360, 386);
+            }
+            else if (game.IconName == "PlayEndfield")
+            {
+                var btnReplace = new AntdUI.Button
+                {
+                    Text = AntdUI.Localization.Get("App.GameSetting.ReplacePlay", "将文件替换为GooglePlay服"),
+                    Location = new Point(20, 268),
+                    Size = new Size(320, 36),
+                    Ghost = true,
+                };
+                btnReplace.Click += async (s, e) =>
+                {
+                    string path = _inputPath.Text.Trim();
+                    if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+                    {
+                        AntdUI.Message.warn(_overview, AntdUI.Localization.Get("App.GameSetting.WarnSetPlayPath", "请先设置GooglePlay服路径"));
+                        return;
+                    }
+                    var result = AntdUI.Modal.open(new AntdUI.Modal.Config(
+                        FindForm() as AntdUI.BaseForm ?? null,
+                        AntdUI.Localization.Get("App.GameSetting.ConfirmReplace", "确认替换"),
+                        AntdUI.Localization.Get("App.GameSetting.ConfirmReplacePlay", "确定要将当前目录替换为GooglePlay服文件吗？此操作会覆盖游戏文件"),
+                        AntdUI.TType.Warn)
+                    {
+                        OkText = AntdUI.Localization.Get("OK", "确定"),
+                        CancelText = AntdUI.Localization.Get("Cancel", "取消")
+                    });
+                    if (result != DialogResult.OK) return;
+
+                    AntdUI.Message.loading(_overview, AntdUI.Localization.Get("App.GameSetting.Replacing", "替换中..."), async (cfg) =>
+                    {
+                        try
+                        {
+                            bool usedHardLink = false;
+                            cfg.Text = AntdUI.Localization.Get("App.Switch.KillingProcess", "结束游戏进程...");
+                            cfg.Refresh();
+                            await GameLauncher.KillArknightsProcesses(true);
+                            await GameLauncher.SwitchServerWithResult(path, game.IconName, msg =>
+                            {
+                                cfg.Text = msg;
+                                cfg.Refresh();
+                            }, true, r => usedHardLink = r);
+                            cfg.OK(AntdUI.Localization.Get("App.GameSetting.ReplaceSuccess", "替换成功，GooglePlay服资源包已覆盖至当前目录"));
+                            (FindForm() as AntdUI.BaseForm)?.Close();
+                            if (!usedHardLink)
+                                AntdUI.Message.info(_overview, AntdUI.Localization.Get("App.Game.HardLinkTip", "提示：将启动器安装到与游戏相同的磁盘分区可启用硬链接，切服速度更快"));
+                        }
+                        catch (Exception ex)
+                        {
+                            cfg.Error(AntdUI.Localization.Get("App.GameSetting.ReplaceFailed", "替换失败：") + ex.Message);
+                        }
+                    });
+                };
+                Controls.Add(btnReplace);
+
+                // ── Token 分割线 ──
+                var dividerToken = new AntdUI.Divider
+                {
+                    Location = new Point(20, 316),
+                    Size = new Size(320, 1),
+                    Thickness = 1F,
+                };
+
+                // ── Token 标题 ──
+                var lblToken = new AntdUI.Label
+                {
+                    Text = AntdUI.Localization.Get("App.GameSetting.SessionToken", "Session Token"),
+                    Location = new Point(20, 330),
+                    Size = new Size(320, 24),
+                    Font = new Font("Microsoft YaHei UI", 9F),
+                };
+
+                // ── Token 输入框 ──
+                var cfgToken = ConfigHelper.Load();
+                var tokenEntry = cfgToken.Games.Find(g => g.IconName == game.IconName);
+                string savedToken = tokenEntry?.SessionToken ?? "";
+                var inputToken = new AntdUI.Input
+                {
+                    Text = savedToken,
+                    Location = new Point(20, 358),
+                    Size = new Size(320, 36),
+                    PlaceholderText = AntdUI.Localization.Get("App.GameSetting.TokenPlaceholder", "未设置 Token"),
+                };
+                inputToken.TextChanged += (s, e) =>
+                {
+                    var cfgT = ConfigHelper.Load();
+                    var entryT = cfgT.Games.Find(g => g.IconName == game.IconName);
+                    if (entryT != null)
+                    {
+                        entryT.SessionToken = inputToken.Text.Trim();
+                        ConfigHelper.Save(cfgT);
+                    }
+                };
+
+                // ── 自动获取 Token ──
+                var btnAutoToken = new AntdUI.Button
+                {
+                    Text = AntdUI.Localization.Get("App.GameSetting.AutoGetToken", "自动获取 Token"),
+                    Location = new Point(20, 406),
+                    Size = new Size(320, 36),
+                    Ghost = true,
+                };
+                btnAutoToken.Click += (s, e) =>
+                {
+                    try
+                    {
+                        // 1. 定义你的原始 PowerShell 命令（在 C# 字符串里怎么写舒服就怎么写）
+                        string rawCommand = "(Get-CimInstance Win32_Process -Filter \"Name = 'Games.exe'\").CommandLine";
+
+                        // 2. 转换成 PowerShell 要求的 Base64 格式 (必须是 Unicode/UTF-16LE)
+                        byte[] commandBytes = System.Text.Encoding.Unicode.GetBytes(rawCommand);
+                        string encodedCommand = Convert.ToBase64String(commandBytes);
+
+                        var psi = new ProcessStartInfo("powershell")
+                        {
+                            // 3. 使用 -EncodedCommand 参数
+                            Arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {encodedCommand}",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            StandardOutputEncoding = System.Text.Encoding.UTF8
+                        };
+
+                        var proc = Process.Start(psi);
+                        string output = proc.StandardOutput.ReadToEnd();
+                        string error = proc.StandardError.ReadToEnd();
+                        proc.WaitForExit();
+
+                        var match = System.Text.RegularExpressions.Regex.Match(
+                            output, @"--g_session_token=(\S+)");
+                        if (match.Success)
+                        {
+                            string token = match.Groups[1].Value;
+                            inputToken.Text = token;
+                            AntdUI.Message.success(_overview,
+                                AntdUI.Localization.Get("App.GameSetting.TokenSuccess", "Token 获取成功"));
+                        }
+                        else
+                        {
+                            string detail = "";
+                            if (!string.IsNullOrWhiteSpace(error))
+                                detail = error.Trim();
+                            else if (!string.IsNullOrWhiteSpace(output))
+                                detail = output.Trim();
+                            AntdUI.Modal.open(new AntdUI.Modal.Config(
+                                FindForm() as AntdUI.BaseForm ?? null,
+                                AntdUI.Localization.Get("App.GameSetting.TokenNotFound", "未找到 Token，请确认游戏已启动"),
+                                string.IsNullOrEmpty(detail) ? "No output from PowerShell" : detail,
+                                AntdUI.TType.Warn)
+                            {
+                                CancelText = null,
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AntdUI.Modal.open(new AntdUI.Modal.Config(
+                            FindForm() as AntdUI.BaseForm ?? null,
+                            AntdUI.Localization.Get("App.GameSetting.TokenNotFound", "未找到 Token，请确认游戏已启动"),
+                            ex.ToString(),
+                            AntdUI.TType.Error)
+                        {
+                            CancelText = null,
+                        });
+                    }
+                };
+
+                Controls.Add(dividerToken);
+                Controls.Add(lblToken);
+                Controls.Add(inputToken);
+                Controls.Add(btnAutoToken);
+
+                var btn = new AntdUI.Button
+                {
+                    Text = AntdUI.Localization.Get("App.GameSetting.EndfieldPlayWebsite", "Endfield GooglePlay 官网"),
+                    Location = new Point(20, 454),
+                    Size = new Size(320, 36),
+                    Ghost = true,
+                };
+                btn.Click += (s, e) =>
+                    new TabHeaderForm("https://endfield.hypergryph.com/en-US/").Show();
+                Controls.Add(btn);
+                Size = new Size(360, 524);
             }
             else
             {
@@ -605,6 +818,7 @@ namespace XelLauncher.Forms
                     "Endfield"       => "Endfield.ico",
                     "BiliEndfield"   => "BiliEndfield.ico",
                     "GlobalEndfield" => "GlobalEndfield.ico",
+                    "PlayEndfield"   => "PlayEndfield.ico",
                     _ => null
                 };
                 if (file == null) return null;

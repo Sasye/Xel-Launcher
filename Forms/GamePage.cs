@@ -187,7 +187,7 @@ namespace XelLauncher.Forms
         {
             string imgFile = _game.IconName switch
             {
-                "Endfield" or "BiliEndfield" or "GlobalEndfield" => "End.jpg",
+                "Endfield" or "BiliEndfield" or "GlobalEndfield" or "PlayEndfield" => "End.jpg",
                 _ => "Arknights.jpg",
             };
             string imgPath = Path.Combine(AppContext.BaseDirectory, "Resources", imgFile);
@@ -223,6 +223,7 @@ namespace XelLauncher.Forms
                     _subBtns.Add(CreateSubButton(Properties.Resources.warfarin, btnWarfarin_Click));
                     break;
                 case "GlobalEndfield":
+                case "PlayEndfield":
                     _subBtns.Add(CreateSubButton(Properties.Resources.endfieldtools, btnEndfieldtools_Click));
                     break;
                 default:
@@ -637,11 +638,11 @@ namespace XelLauncher.Forms
                     StringComparison.OrdinalIgnoreCase);
 
             // Endfield 三服：只要当前游戏与任意另一个 Endfield 服路径相同就执行替换
-            bool isEndfield = _game.IconName == "Endfield" || _game.IconName == "BiliEndfield" || _game.IconName == "GlobalEndfield";
+            bool isEndfield = _game.IconName == "Endfield" || _game.IconName == "BiliEndfield" || _game.IconName == "GlobalEndfield" || _game.IconName == "PlayEndfield";
             bool endfieldSameRoot = false;
             if (isEndfield && !string.IsNullOrEmpty(path))
             {
-                var endfieldIcons = new[] { "Endfield", "BiliEndfield", "GlobalEndfield" };
+                var endfieldIcons = new[] { "Endfield", "BiliEndfield", "GlobalEndfield","PlayEndfield" };
                 foreach (var other in endfieldIcons)
                 {
                     if (other == _game.IconName) continue;
@@ -685,7 +686,7 @@ namespace XelLauncher.Forms
                 endfieldSameRoot = false;
                 if (isEndfield)
                 {
-                    var endfieldIcons2 = new[] { "Endfield", "BiliEndfield", "GlobalEndfield" };
+                    var endfieldIcons2 = new[] { "Endfield", "BiliEndfield", "GlobalEndfield", "PlayEndfield" };
                     foreach (var other in endfieldIcons2)
                     {
                         if (other == _game.IconName) continue;
